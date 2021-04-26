@@ -1,5 +1,18 @@
 .App {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  background-color: #6e6e6e;
+  min-height: 100vh;
+}
+
+.Formulario{
+  background-color: #4946466e;
+  min-height: 100vh;
+  min-width: 500px;
+  display: flex;
+  flex-direction: column;
+  font-size: calc(5px + 2vmin);
+  color: rgb(255, 255, 255);
 }
 
 .App-logo {
