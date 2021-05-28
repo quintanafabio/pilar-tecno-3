@@ -1,5 +1,6 @@
 import React from 'react'
 import {MainList} from '../components/MainList'
+import {getPuesto, getAll, getEmpresa, postTrabajo} from '../clients/todoClient';
 
 const style = {
     paddingTop: "30px"
@@ -13,13 +14,13 @@ export class MainView extends React.Component {
         }
     }
 
-    componentDidMount() {
-        if(localStorage.getItem("puestos") != null){
-			this.setState({
-				puestos: JSON.parse(localStorage.getItem("puestos"))
-			})
-		}
+    componentDidMount() {   
+        getAll().then(res => {
+          this.setState({puestos: res})
+        })   
     }
+
+
 
     componentDidUpdate(prevProps, prevState){
         if(prevState.puestos !== this.state.puestos){

@@ -1,5 +1,6 @@
 import React from 'react';
 import {PuestoList} from '../components/PuestoList';
+import {getPuesto, getEmpresa, postPuesto, deletePuesto} from '../clients/todoClient';
 
 export class PuestosView extends React.Component {
   constructor() {
@@ -7,37 +8,52 @@ export class PuestosView extends React.Component {
     this.state = {
       puestos: [],
       newPuesto: "",
+      newDescripcion: "",
       empresas: [],
-      empresa: []
+      empresaId: [],
     };
   }
 
   componentDidMount() {
-    this.setState({
-        puestos: localStorage.getItem('puestos') ? JSON.parse(localStorage.getItem('puestos')) : [],
-        empresas: localStorage.getItem('empresas') ? JSON.parse(localStorage.getItem('empresas')) : [],
-    });
+    
+    getEmpresa().then(res => {
+      this.setState({empresas: res})
+    })
+
+    getPuesto().then(res => {
+      this.setState({puestos: res})
+    })   
+
+
+
+
+    // this.setState({
+    //     puestos: localStorage.getItem('puestos') ? JSON.parse(localStorage.getItem('puestos')) : [],
+    //     empresas: localStorage.getItem('empresas') ? JSON.parse(localStorage.getItem('empresas')) : [],
+    // });
   }
 
   componentDidUpdate(prevProps, prevState){
-    if(prevState.puestos !== this.state.puestos){
-        localStorage.setItem("puestos", JSON.stringify(this.state.puestos))
-    }
+    getPuesto().then(res => {
+      this.setState({puestos: res})
+    })   
   }
 
-  addNewPuesto = (newEmpresa) => {
-    this.setState({
-        puestos: [...this.state.puestos, {'Puesto': this.state.newPuesto, 'Empresa': this.state.empresa.Empresa, 'Ciudad': this.state.empresa.Ciudad, 'Pais': this.state.empresa.Pais, }],
-        newPuesto: '',
-        empresa:''
-    });
+  addNewPuesto = () => {
+    postPuesto(this.state.newPuesto, this.state.newDescripcion, this.state.empresaId).then(res => this.setState({
+      puestos: [...this.state.puestos, res]
+    }))
 }
 
-  deletePuesto = (id) => {
-    this.setState({
-      puestos: this.state.puestos.filter((_, idx) => idx !== id)
-    });
-  }
+borrarPuesto = (id) => {
+
+  deletePuesto (id).then(res => this.setState({
+    // puestos: this.state.puestos.filter((_, idx) => idx !== id),
+
+  }))
+  
+}
+
 
   handleNewPuesto = (e) => {
     this.setState({
@@ -45,10 +61,16 @@ export class PuestosView extends React.Component {
     });
   }
 
+  handleNewDescripcion = (e) => {
+    this.setState({
+        newDescripcion: e.target.value,
+    });
+  }
+
     handleSelect = (e) => {
         e.preventDefault();
         this.setState({
-            empresa: JSON.parse(e.target.value),
+          empresaId: JSON.parse(e.target.value),
         });
     };
 
@@ -58,13 +80,24 @@ export class PuestosView extends React.Component {
     {
         return false;
     }
-    this.addNewPuesto(e, this.state.newPuesto)
+    this.addNewPuesto()
   }
+
+  handleNewDescripcionSubmit = (e) => {
+    e.preventDefault();
+    if( this.state.newDescripcion.trim() === '')
+    {
+        return false;
+    }
+    this.addNewPuesto()
+  }
+
+
 
   render() {
     return (
       <div>
-        <form onSubmit={this.handleNewPuestoSubmit}>
+        <form onSubmit={this.handleNewPuestoSubmit, this.handleNewDescripcionSubmit}>
 
         <label
 						htmlFor="exampleFormControlInput1"
@@ -83,18 +116,38 @@ export class PuestosView extends React.Component {
 						value={this.state.newPuesto}
 					/>
 
+
+          <label
+						htmlFor="exampleFormControlInput1"
+						className="form-label"
+					>
+						Descripcion del puesto
+					</label>
+					<input
+						type="text"
+						className="form-control"
+						id="exampleFormControlInput1"
+						name="name"
+						placeholder="Ingrese una descripcion"
+						onChange={(e) => this.handleNewDescripcion(e)}
+            required
+						value={this.state.newDescripcion}
+					/>
+
+          
+
           <label>Empresa:</label>
           <select id="inputGroupSelect01" onChange={(e) => this.handleSelect(e)} value={JSON.stringify(this.state.empresa)}>
 						<option value={JSON.stringify({})}>Elegir Empresa</option>
                         { this.state.empresas.map((empresa, index) => (
-                            <option key={index+1} value={JSON.stringify(empresa)}>{empresa.Empresa}</option>
+                            <option key={index+1} value={empresa.id}>{empresa.name}</option>
                         ))}
 					</select>
 
           <button type="submit" className="btn btn-primary" >Agregar</button>
         </form>
         <ul>
-          <PuestoList puestos={this.state.puestos} onDeletePuesto= {this.deletePuesto}></PuestoList>
+          <PuestoList puestos={this.state.puestos} onDeletePuesto= {this.borrarPuesto}></PuestoList>
         </ul>
       </div>
     );

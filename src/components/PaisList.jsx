@@ -4,8 +4,8 @@ export const PaisList = ({paises, onDeletePais}) => (
     <>
       {paises.map((elem, idx) => (
           <li key={idx}>
-          <h3>{elem.Pais}</h3>
-          <button className="btn btn-danger" onClick={() => onDeletePais(idx)}>Eliminar</button>
+          <h3>Id: {elem.id} - {elem.name}</h3>
+          <button className="btn btn-danger" onClick={() => onDeletePais(elem.id)}>Eliminar</button>
           </li> 
       ))}
     </>
