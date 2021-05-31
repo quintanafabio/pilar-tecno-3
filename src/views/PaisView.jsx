@@ -57,17 +57,11 @@ componentDidMount() {
     {
         return false;
     }
-
     const pais ={
       nombrePais: this.state.newPais
     }
     
-   
-    
     this.addNewPais(e, this.state.newPais)
-
-    
-
 
   }
 

@@ -1,7 +1,6 @@
 import React from 'react';
 import {CiudadList} from '../components/CiudadList';
 import {getPais, getCiudad, postCiudad, deleteCiudad } from '../clients/todoClient';
-import axios from 'axios';
 
 export class CiudadView extends React.Component {
   constructor() {
