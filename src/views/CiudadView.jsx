@@ -1,5 +1,6 @@
 import React from 'react';
 import {CiudadList} from '../components/CiudadList';
+import {getPais, getCiudad, postCiudad, deleteCiudad } from '../clients/todoClient';
 
 export class CiudadView extends React.Component {
   constructor() {
@@ -8,37 +9,45 @@ export class CiudadView extends React.Component {
       ciudades: [],
       newCiudad: "",
       paises: [],
-      pais: []
+      idPais: [],
     };
   }
       
-  componentDidMount() {
-    this.setState({
-        paises: localStorage.getItem('paises') ? JSON.parse(localStorage.getItem('paises')) : [],
-        ciudades: localStorage.getItem('ciudades') ? JSON.parse(localStorage.getItem('ciudades')) : [],
-    });
-  }
+componentDidMount() {   
+    getCiudad().then(res => {
+      this.setState({ciudades: res})
+    })
 
+    getPais().then(res => {
+      this.setState({paises: res})
+})
+
+  }
   componentDidUpdate(prevProps, prevState){
-    if(prevState.ciudades !== this.state.ciudades){
-        localStorage.setItem("ciudades", JSON.stringify(this.state.ciudades))
-    }
+
+    getCiudad().then(res => {
+      this.setState({ciudades: res})
+    })
+
   }
 
-  addNewCiudad = (newCiudad) => {
-    this.setState({
-        ciudades: [...this.state.ciudades, {'Ciudad': this.state.newCiudad, 'Pais': this.state.pais.Pais}],
-        newCiudad: '',
-        pais:''
-    });
+  addNewCiudad = () => {
+
+    postCiudad(this.state.newCiudad, this.state.idPais).then(res => this.setState({
+      ciudades: [...this.state.ciudades, res]
+    }))
+
   }
 
-  deleteCiudad = (id) => {
-    this.setState({
-      ciudades: this.state.ciudades.filter((_, idx) => idx !== id)
-    });
-  }
+  borrarCiudad = (id) => {
 
+    deleteCiudad(id).then(res => this.setState({
+      // ciudades: this.state.ciudades.filter((_, idx) => idx !== id),
+
+    }))
+    
+  }
+  
   handleNewCiudad = (e) => {
     this.setState({
         newCiudad: e.target.value,
@@ -48,7 +57,7 @@ export class CiudadView extends React.Component {
 	handleSelect = (e) => {
 		e.preventDefault();
 		this.setState({
-			  pais: JSON.parse(e.target.value),
+      idPais: e.target.value,
 		});
 	};
 
@@ -66,35 +75,31 @@ export class CiudadView extends React.Component {
       <div class className="mb-3">
         <form onSubmit={this.handleNewCiudadSubmit}>
 
-          <label
-              htmlFor="exampleFormControlInput1"
-              className="form-label"
-            >
-              Ciudad
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="exampleFormControlInput1"
-              name="name"
-              placeholder="Ingrese una Ciudad"
-              onChange={(e) => this.handleNewCiudad(e)}
-              required
-              value={this.state.newCiudad}
-            />
-          
-            <label>Pais:</label>
-            <select id="inputGroupSelect01" className="form-select" onChange={(e) => this.handleSelect(e)} value={JSON.stringify(this.state.pais)}>
+
+            <label>Ciudades:</label>
+
+          <input
+						type="text"
+						className="form-control"
+						id="exampleFormControlInput1"
+						name="name"
+						placeholder="Ingrese una ciudad"
+						onChange={(e) => this.handleNewCiudad(e)}
+            required
+						value={this.state.newCiudad}
+					/>
+
+            <select id="inputGroupSelect01"  onChange={(e) => this.handleSelect(e)} value={JSON.stringify(this.state.pais)}>
               <option value={JSON.stringify({})}>Elegir Pais</option>
-                          { this.state.paises.map((pais, index) => (
-                              <option key={index+1} value={JSON.stringify(pais)}>{pais.Pais}</option>
+                          { this.state.paises.map((elemento, index) => (
+                              <option key={index+1} value={elemento.id}>{elemento.name}</option>
                           ))}
             </select>
 
             <button type="submit" className="btn btn-primary">Agregar</button>
           </form>
           <ul>
-            <CiudadList ciudades={this.state.ciudades} onDeleteCiudad= {this.deleteCiudad}></CiudadList>
+            {<CiudadList ciudades={this.state.ciudades} onDeleteCiudad= {this.borrarCiudad}></CiudadList>} 
           </ul>
         </div>
     );

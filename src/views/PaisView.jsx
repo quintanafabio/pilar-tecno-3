@@ -1,38 +1,47 @@
 import React from 'react';
 import {PaisList} from '../components/PaisList';
+import {getPais, postPais, deletePais} from '../clients/todoClient';
+
 
 export class PaisView extends React.Component {
   constructor() {
     super();
     this.state = {
       paises: [],
-      newPais: ''
+      newPais: '',
     };
   }
 
-  componentDidMount() {
-    this.setState({
-        paises: localStorage.getItem('paises') ? JSON.parse(localStorage.getItem('paises')) : [],
-    });
-  }
+componentDidMount() {
+    getPais().then(res => {
+      this.setState({paises: res})
+    })    
+}
 
   componentDidUpdate(prevProps, prevState){
-    if(prevState.paises !== this.state.paises){
-        localStorage.setItem('paises', JSON.stringify(this.state.paises))
-    }
+    
+      getPais().then(res => {
+        this.setState({paises: res})
+      })    
+
   }
 
-  addNewPais = (newPais) => {
-        this.setState({
-            paises: [...this.state.paises, {'Pais': this.state.newPais,}],
-            newPais: ''
-        });
+  addNewPais = () => {
+
+        postPais(this.state.newPais).then(res => this.setState({
+          paises: [...this.state.paises, res]
+        }))
+        
+
   }
 
-  deletePais = (id) => {
-    this.setState({
-      paises: this.state.paises.filter((_, idx) => idx !== id)
-    });
+  borrarPais = (id) => {
+
+    deletePais(id).then(res => this.setState({
+      // paises: this.state.paises.filter((_, idx) => idx !== id),
+
+    }))
+    
   }
 
   handleNewPais = (e) => {
@@ -48,11 +57,17 @@ export class PaisView extends React.Component {
     {
         return false;
     }
+    const pais ={
+      nombrePais: this.state.newPais
+    }
+    
     this.addNewPais(e, this.state.newPais)
+
   }
 
-  render() {
+render() {
     return (
+      
 
       <div>
         <form onSubmit={this.handleNewPaisSubmit}>
@@ -63,7 +78,7 @@ export class PaisView extends React.Component {
 					>
 						Pais
 					</label>
-					<input
+          <input
 						type="text"
 						className="form-control"
 						id="exampleFormControlInput1"
@@ -74,13 +89,19 @@ export class PaisView extends React.Component {
 						value={this.state.newPais}
 					/>
 
-          <button type="submit" className="btn btn-primary"> Agregar </button>
-        </form>
-        <ul>
-          <PaisList paises={this.state.paises} onDeletePais= {this.deletePais}></PaisList>
-        </ul>
+        <button type="submit" className="btn btn-primary">Agregar</button>
+
+
+        </form>              
+        { <ul>
+          { <PaisList paises={this.state.paises} onDeletePais= {this.borrarPais}></PaisList>}
+        </ul>}
       </div>
-    );
+   );
+
   }
+
+
 }
+
 
